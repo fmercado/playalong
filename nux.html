@@ -1,0 +1,335 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+      <title>NUX MIGHTY AIR</title>
+      <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+      <script src="./libs/jquery-3.6.0.min.js"></script>
+      <script src="./libs/Helper.js"></script>
+      <script src="./WebMidi.js"></script>
+      <script src="./libs/BleMidi.js"></script>
+      <script src="./libs/webaudio-controls.js"></script>
+      
+      <style>
+         .bd-placeholder-img {
+         font-size: 1.125rem;
+         text-anchor: middle;
+         -webkit-user-select: none;
+         -moz-user-select: none;
+         user-select: none;
+         }
+         @media (min-width: 768px) {
+         .bd-placeholder-img-lg {
+         font-size: 3.5rem;
+         }
+         }
+         .b-example-divider {
+         height: 3rem;
+         background-color: rgba(0, 0, 0, .1);
+         border: solid rgba(0, 0, 0, .15);
+         border-width: 1px 0;
+         box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+         }
+         .b-example-vr {
+         flex-shrink: 0;
+         width: 1.5rem;
+         height: 100vh;
+         }
+         .bi {
+         vertical-align: -.125em;
+         fill: currentColor;
+         }
+         .nav-scroller {
+         position: relative;
+         z-index: 2;
+         height: 2.75rem;
+         overflow-y: hidden;
+         }
+         .nav-scroller .nav {
+         display: flex;
+         flex-wrap: nowrap;
+         padding-bottom: 1rem;
+         margin-top: -1px;
+         overflow-x: auto;
+         text-align: center;
+         white-space: nowrap;
+         -webkit-overflow-scrolling: touch;
+         }
+         .pedal {
+         padding: 20px;
+         display: none;
+         box-shadow: 2px;
+         position: relative;
+         }
+         .preview {
+         max-width: 90px;
+         max-height: 90px;
+         filter: grayscale(100%);
+         border: 5px solid #555;
+         }
+      </style>
+      <!-- Custom styles for this template -->
+      <link href="cover.css" rel="stylesheet">
+   </head>
+   <body class="d-flex h-100  text-white bg-dark">
+      <div id="akb" class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+      <div id="BLEView" >
+         <input type="button" class="btn btn-lg btn-secondary fw-bold border-white bg-white" id="butConnect" value="Connect">
+         <input type="button" class="btn btn-danger"  id="disConnect" value="Disconnect" hidden="true">
+         <div id="bleName"> </div>
+         <div id="logBle"></div>
+      </div>
+      <h4>Select Video</h4>
+      <div class="d-flex">
+         <div class="container flex-1">
+            <div class="row"><input type="text" id="videoId" value="Z2lxuGLb5Qw"></div>
+            <div class="row"><input type="button" id="loadVideo" value="Change Video"></div>
+            <div class="row"><input type="button" id="playbackPlay" value="Play"></div>
+            <div class="row"><input type="button" id="playbackStop" value="Stop"></div>
+            <div class="row"><input type="button" id="resetCues" value="Reset Cues"></div>
+         </div>
+         <div class="m-1 flex-2">
+            <div class="shadow-lg  rounded" id="ytplayer"></div>
+         </div>
+      </div>
+      <div>
+         <div id="cues"></div>
+      </div>
+      <h4>Choose Presets</h4>
+      <div class="h-100">
+         <input type="button" id="preset1" value="Preset 1">
+         <input type="button" id="preset2" value="Preset 2">
+         <input type="button" id="preset3" value="Preset 3">
+         <input type="button" id="preset4" value="Preset 4">
+         <input type="button" id="preset5" value="Preset 5">
+         <input type="button" id="preset6" value="Preset 6">
+         <input type="button" id="preset7" value="Preset 7">
+      </div>
+      <BR/>
+      <h4>Choose Effects</h4>
+      <div class="d-flex">
+         <img class="preview" src="img/touchwah.png" id="efx1">
+         <img class="preview" src="img/vibe.png" id="efx2">
+         <img class="preview" src="img/tremolo.png" id="efx3">
+         <img class="preview" src="img/phaser.png" id="efx4">
+         <img class="preview" src="img/steelsinger.png" id="efx5">
+         <img class="preview" src="img/ts.png" id="efx6">
+         <img class="preview" src="img/katana.png" id="efx7">
+         <img class="preview" src="img/eq.png" id="efx8">
+         <img class="preview" src="img/fuzz.png" id="efx9">
+         <img class="preview" src="img/crunch.png" id="efx10">
+         <img class="preview" src="img/drive.png" id="efx11">
+         <img class="preview" src="img/morning.png" id="efx12">
+         <img class="preview" src="img/distortion.png" id="efx13">
+         <img class="preview" src="img/compressor.png" id="efx14">
+      </div>
+      <div>
+         <div class="pedal" id="pedal_efx1">
+            <img src="img/touchwah.png" id="wah">
+            <div style="position: absolute; top:28px; left: 42px;">
+               <webaudio-knob diameter=28 value=50 src="./img/plastic_knob.png" id="wah1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:58px; left: 42px;">
+               <webaudio-knob diameter=28 value=50 src="./img/plastic_knob.png" id="wah2"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top: 88px; left: 42px;">
+               <webaudio-knob diameter=28 value=50 src="./img/plastic_knob.png" id="wah3"></webaudio-knob>
+            </div>
+            <button id="engageWah">Engage</button>
+         </div>
+         <div class="pedal" id="pedal_efx2">
+            <img src="img/vibe.png" id="vibe">
+            Rate 
+            <webaudio-knob src="./img/Vintage_Knob.png" id="vibe1"></webaudio-knob>
+            Depth 
+            <webaudio-knob src="./img/Vintage_Knob.png" id="vibe2"></webaudio-knob>
+            <button id="engageVibe">Engage</button>
+         </div>
+         <div class="pedal" id="pedal_efx3">
+            <img src="img/tremolo.png" id="tremolo">
+            <div style="position: absolute; top:36px; left: 37px;">
+               <webaudio-knob diameter=28 value=50 src="./img/MiniMoog_Main.png" id="tremolo1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:36px; left: 80px;">
+               <webaudio-knob diameter=28 value=50 src="./img/MiniMoog_Main.png" id="tremolo2"></webaudio-knob>
+            </div>
+            <button id="engageTremolo">Engage</button>
+         </div>
+         <div class="pedal" id="pedal_efx4">
+            <img src="img/phaser.png" id="phaser">
+            <div style="position: absolute; top:46px; left: 37px;">
+               <webaudio-knob diameter=38 value=50 src="./img/plastic_knob.png" id="phaser1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:46px; left: 102px;">
+               <webaudio-knob diameter=38 value=50 src="./img/plastic_knob.png" id="phaser2"></webaudio-knob>
+            </div>
+            <button id="engagePhaser">Engage</button>
+         </div>
+         <div class="pedal" id="pedal_efx5">
+            <img src="img/steelsinger.png" id="steelsinger">
+            <div style="position: absolute; top:30px; left: 32px;">
+               <webaudio-knob diameter=34 value=50 src="./img/Vintage_Knob.png" id="wah1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:30px; left: 78px;">
+               <webaudio-knob diameter=34 value=50 src="./img/Vintage_Knob.png" id="singer1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:64px; left: 55px;">
+               <webaudio-knob diameter=34 value=50 src="./img/Vintage_Knob.png" id="singer2"></webaudio-knob>
+            </div>
+            <button id="engageSinger">Engage</button>
+         </div>
+         <div class="pedal" id="pedal_efx6">
+            <img src="img/ts.png" id="ts">
+            <div style="position: absolute; top:30px; left: 85px;">
+               <webaudio-knob value=50 diameter=32 src="./img/MiniMoog_Main.png" id="ts1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:51px; left: 58px;">
+               <webaudio-knob value=50 diameter=32 src="./img/MiniMoog_Main.png" id="ts2"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:30px; left: 30px;">
+               <webaudio-knob value=50 diameter=32 src="./img/MiniMoog_Main.png" id="ts3"></webaudio-knob>
+            </div>
+            <button id="engageTS">Engage</button>
+            Level 
+            Tone 
+            Drive 
+         </div>
+         <div class="pedal" id="pedal_efx7">
+            <img src="img/katana.png" id="katana">
+            Volume 
+            <webaudio-knob src="./img/MiniMoog_Main.png" id="katana1"></webaudio-knob>
+            <button id="engageKatana">Engage</button>
+         </div>
+         <div class="pedal" id="pedal_efx8">
+            <img src="img/eq.png" id="eq">
+            <div style="position: absolute; top:44px; left: 36px;">
+               <webaudio-knob diameter=24 value=50 src="./img/MiniMoog_Main.png" id="eq1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:44px; left: 62px;">
+               <webaudio-knob diameter=24 value=50 src="./img/MiniMoog_Main.png" id="eq2"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:44px; left: 90px;">
+               <webaudio-knob diameter=24 value=50 src="./img/MiniMoog_Main.png" id="eq3"></webaudio-knob>
+            </div>
+            <button id="engageEq">Engage</button>
+            Bass 
+            Middle 
+            Treble 
+         </div>
+         <div class="pedal" id="pedal_efx9">
+            <img src="img/fuzz.png" id="fuzz">
+            <div style="position: absolute; top:32px; left: 32px;">
+               <webaudio-knob value="50" diameter="28" id="fuzz1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:64px; left: 58px;">
+               <webaudio-knob value="50" diameter="28" id="fuzz2"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:32px; left: 83px;">
+               <webaudio-knob value="50" diameter="28" id="fuzz3"></webaudio-knob>
+            </div>
+            <button id="engageFuzz">Engage</button>
+            Volume 
+            Tone 
+            Sustain 
+         </div>
+         <div class="pedal" id="pedal_efx10">
+            <img src="img/crunch.png" id="crunch">
+            <div style="position: absolute; top:23px; left: 13px;">
+               <webaudio-knob value="50" diameter="60" src="./img/lineshadow.png" id="crunch1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:40px; left: 42px;">
+               <webaudio-knob value="50" diameter="60" src="./img/lineshadow.png" id="crunch2"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:23px; left: 76px;">
+               <webaudio-knob value="50" diameter="60" src="./img/lineshadow.png" id="crunch3"></webaudio-knob>
+            </div>
+            <button id="engageCrunch">Engage</button>
+            Volume 
+            Tone 
+            Gain 
+         </div>
+         <div class="pedal" id="pedal_efx11">
+            <img src="img/drive.png" id="drive">
+            <div style="position: absolute; top:61px; left: 32px;">
+               <webaudio-knob diameter=31 value=50 src="./img/plastic_knob.png" id="drive1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:47px; left: 62px;">
+               <webaudio-knob diameter=31 value=50 src="./img/plastic_knob.png" id="drive2"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:61px; left: 94px;">
+               <webaudio-knob diameter=31 value=50 src="./img/plastic_knob.png" id="drive3"></webaudio-knob>
+            </div>
+            <button id="engageDirt">Engage</button>
+            Drive 
+            Tone 
+            Level 
+         </div>
+         <div class="pedal" id="pedal_efx12">
+            <img src="img/morning.png" id="morning">
+            <div style="position: absolute; top:32px; left: 34px;">
+               <webaudio-knob diameter=32 value=50 src="./img/MiniMoog_Main.png" id="morning1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:71px; left: 84px;">
+               <webaudio-knob diameter=32 value=50 src="./img/MiniMoog_Main.png" id="morning2"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:32px; left: 84px;">
+               <webaudio-knob diameter=32 value=50 src="./img/MiniMoog_Main.png" id="morning3"></webaudio-knob>
+            </div>
+            <button id="engageMorning">Engage</button>
+            Level 
+            Tone 
+            Drive 
+         </div>
+         <div class="pedal" id="pedal_efx13">
+            <img src="img/distortion.png" id="distortion">
+            <div style="position: absolute; top:36px; left: 38px;">
+               <webaudio-knob diameter=28 value=50 src="./img/MiniMoog_Main.png" id="distortion1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:56px; left: 64px;">
+               <webaudio-knob diameter=24 value=50 src="./img/MiniMoog_Main.png" id="distortion2"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:36px; left: 84px;">
+               <webaudio-knob diameter=28 value=50 src="./img/MiniMoog_Main.png" id="distortion3"></webaudio-knob>
+            </div>
+            <button id="engageDistortion">Engage</button>
+            Level 
+            Tone 
+            Drive 
+         </div>
+         <div class="pedal" id="pedal_efx14">
+            <img src="img/compressor.png" id="compressor">
+            <div style="position: absolute; top:38px; left: 34px;">
+               <webaudio-knob diameter=52 value=50 src="./img/plastic_knob.png" id="compressor1"></webaudio-knob>
+            </div>
+            <div style="position: absolute; top:38px; left: 88px;">
+               <webaudio-knob diameter=52 value=50 src="./img/plastic_knob.png" src="./img/MiniMoog_Main.png" id="compressor2"></webaudio-knob>
+            </div>
+            <button id="engageCompressor">Engage</button>
+            Sustain 
+            Level 
+         </div>
+         <button id="disengage">Disengage</button>
+         <BR/>
+         <BR/>
+         <BR/>
+      </div>
+      <script>
+         // Load the IFrame Player API code asynchronously.
+         var tag = document.createElement('script');
+         tag.src = "https://www.youtube.com/player_api";
+         var firstScriptTag = document.getElementsByTagName('script')[0];
+         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+         
+         // Replace the 'ytplayer' element with an <iframe> and
+         // YouTube player after the API code downloads.
+         var player;
+         function onYouTubePlayerAPIReady() {
+           player = new YT.Player('ytplayer', {
+             height: '360',
+             width: '640',
+             videoId: 'UeimvmRZ3jg'
+           });
+         }
+      </script>
+   </body>
+</html>
